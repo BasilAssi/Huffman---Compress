@@ -1,0 +1,101 @@
+ private int alloc(){
+        int p = cursorList[0].next;
+        cursorList[0].next = cursorList[p].next;
+        if(p == 0){
+            throw new OutOfMemoryError();
+        }
+        return p;
+    }
+
+    private void free(int p){
+        cursorList[p].name = null;
+        cursorList[p].next = cursorList[0].next;
+        cursorList[0].next = p;
+    }
+
+   
+    public CursorLinkedList(){
+
+        cursorList = new CursorNode[LIST_SIZE];
+
+        for(int i = 0;i < LIST_SIZE;i++){
+            // Initialize each node next pointer
+            cursorList[i] = new CursorNode(null,i + 1);
+        }
+        header = alloc();
+        //Set the last node's pointer to the first node
+        cursorList[LIST_SIZE - 1].next = 0;
+        cursorList[header].next = 0;
+        size=0;
+    }
+
+    
+    public boolean isEmpty(){
+        return cursorList[header].next == 0;
+    }
+
+    
+    public void clear(){
+        while(!isEmpty()){
+            remove(first().getNext());
+        }
+        size=0;
+    }
+
+    
+    public CursorListIterator zeroth(){
+        return new CursorListIterator(header);
+    }
+
+    
+    public CursorListIterator first(){
+        return new CursorListIterator(cursorList[header].next);
+    }
+
+   
+    public CursorListIterator find(String name){
+        int iterator = cursorList[header].next;
+        while(iterator != 0 && !cursorList[iterator].name.equals(name)){
+            iterator = cursorList[iterator].next;
+        }
+        return new CursorListIterator(iterator);
+    }
+
+   
+    public void insert(String name,CursorListIterator p){
+        if(p != null && p.current != 0){
+            int pos = p.current;
+            int temp = alloc();
+
+            cursorList[temp].name = name;
+            cursorList[temp].next = cursorList[pos].next;
+            cursorList[pos].next = temp;
+           size++;
+        }
+    }
+
+   
+    public boolean remove(String name){
+        CursorListIterator p = findPrevious(name);
+        int pos = p.current;
+        if(cursorList[pos].next != 0){
+            int temp = cursorList[pos].next;
+            cursorList[pos].next = cursorList[temp].next;
+            free(temp);
+            size--;
+            return true;
+        }
+        else {
+            // name not found in the list
+            return false;
+        }
+    }
+
+    
+    public CursorListIterator findPrevious(String name){
+        int itr = header;
+        while(cursorList[itr].next != 0 && !cursorList[cursorList[itr].next].name.equals(name)){
+            itr = cursorList[itr].next;
+        }
+        return new CursorListIterator(itr);
+    }
